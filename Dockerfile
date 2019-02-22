@@ -4,14 +4,15 @@ FROM golang:${GO_VERSION}-alpine AS builder
 
 RUN apk update && apk add alpine-sdk git && rm -rf /var/cache/apk/*
 
-RUN go get github.com/gin-gonic/gin
-RUN go get github.com/jinzhu/gorm
-RUN go get github.com/mattn/go-sqlite3
-
 RUN mkdir -p /api
 WORKDIR /api
-ADD . /api
-RUN go build ./app.go
+
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+COPY . .
+RUN go build -o ./app ./src/main.go
 
 FROM alpine:latest
 
